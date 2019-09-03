@@ -3,9 +3,14 @@ package com.gupaovip.rocketmq.demo;
 import org.apache.rocketmq.client.exception.MQBrokerException;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
+import org.apache.rocketmq.client.producer.MessageQueueSelector;
+import org.apache.rocketmq.client.producer.SendCallback;
 import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.common.message.Message;
+import org.apache.rocketmq.common.message.MessageQueue;
 import org.apache.rocketmq.remoting.exception.RemotingException;
+
+import java.util.List;
 
 /**
  * ClassName:MyRocketMQProducer
@@ -30,9 +35,29 @@ public class MyRocketMQProducer {
             num++;
             // Topic
             // tags -> 标签 (分类) -> (筛选)
-            Message message=new Message("gp_test_topic","",("Producer"+num).getBytes());
-            SendResult sendResult = producer.send(message);
-            System.out.println(sendResult);
+            Message message=new Message("gp_test_topic","TagA",("Producer"+num).getBytes());
+
+//            SendResult sendResult = producer.send(message);// 是否阻塞
+//            System.out.println(sendResult);
+           /* producer.send(message, new SendCallback() {
+                @Override
+                public void onSuccess(SendResult sendResult) {
+                    System.out.println(sendResult);
+                }
+
+                @Override
+                public void onException(Throwable e) {
+
+                }
+            });*/
+           producer.send(message, new MessageQueueSelector() {
+               @Override
+               public MessageQueue select(List<MessageQueue> list, Message msg, Object arg) {
+                   return list.get(0);
+               }
+           },"key-"+num);
         }
+        // 异步就不能关闭了
+        // producer.shutdown();
     }
 }
