@@ -50,6 +50,7 @@ public class MyRocketMQProducer {
 
                 }
             });*/
+            // 发送到指定queue
            producer.send(message, new MessageQueueSelector() {
                @Override
                public MessageQueue select(List<MessageQueue> list, Message msg, Object arg) {
